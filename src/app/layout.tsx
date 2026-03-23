@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter, Poppins, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
@@ -25,8 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable} ${playfair.variable}`}>
-      <body className="antialiased bg-[#0f0f0f] text-white">
+       <body className="antialiased bg-[#0f0f0f] text-white">
         {children}
+        <Script src="https://js.puter.com/v2/" strategy="beforeInteractive" />
       </body>
     </html>
   );
