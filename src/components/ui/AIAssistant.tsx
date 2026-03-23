@@ -19,8 +19,8 @@ export default function AIAssistant() {
     {
       id: "1",
       role: "ai",
-      text: "Hi! I'm PJ's Digital Assistant. How can I help you navigate his creative world today?",
-      timestamp: 1711152000000, // Static timestamp for March 23, 2026
+      text: "Hey friend! I'm your digital companion in PJ's universe. I have full authority to show you anything or answer any questions you have. What should we explore first?",
+      timestamp: 1711152000000,
     },
   ]);
   const [inputValue, setInputValue] = useState("");
@@ -57,17 +57,42 @@ export default function AIAssistant() {
 
     // Simulate AI response
     setTimeout(() => {
-      let aiText = "That's a great question! PJ specializes in high-end, animated web experiences. Would you like to see his portfolio?";
-      
+      let aiText = "I'm on it! I can help with anything from technical details to personal stories. What's on your mind, buddy?";
       const lowerText = text.toLowerCase();
-      if (lowerText.includes("who is pj")) {
-        aiText = "Popuri Jayesh (PJ) is a Creative Web Developer & Designer who builds premium, cinematic digital experiences. He loves blending 3D, animation, and high performance.";
-      } else if (lowerText.includes("projects") || lowerText.includes("portfolio")) {
-        aiText = "PJ has worked on several award-winning concepts, including the Green Caffeine Cafe and modern E-commerce platforms. You can scroll down to the Portfolio section to see them in action!";
-      } else if (lowerText.includes("hire") || lowerText.includes("contact")) {
-        aiText = "Ready to start a project? You can use the contact form below or reach out via WhatsApp/Email. PJ typically responds within 24 hours.";
-      } else if (lowerText.includes("stack") || lowerText.includes("tech")) {
-        aiText = "PJ's core stack includes Next.js, TypeScript, Three.js (R3F), Framer Motion, and Tailwind CSS. He's an expert in creating smooth, high-performance interactions.";
+
+      // COMMANDS WITH AUTHORITY
+      if (lowerText.includes("open instagram") || lowerText.includes("your instagram")) {
+        aiText = "Right away! Opening PJ's Instagram for you. It's full of creative vibes.";
+        window.open("https://www.instagram.com/jayeeshhh__", "_blank");
+      } else if (lowerText.includes("email") || lowerText.includes("message")) {
+        aiText = "Consider it done. I'm opening your email client to message PJ directly.";
+        window.location.href = "mailto:popurijayesh0@gmail.com";
+      } else if (lowerText.includes("portfolio") || lowerText.includes("show projects")) {
+        aiText = "Check this out! I'm taking you straight to the Portfolio section.";
+        const el = document.getElementById("portfolio");
+        el?.scrollIntoView({ behavior: "smooth" });
+      } else if (lowerText.includes("contact") || lowerText.includes("hire")) {
+        aiText = "Absolutely. Let's get your project started. Scrolling to the contact section now.";
+        const el = document.getElementById("contact");
+        el?.scrollIntoView({ behavior: "smooth" });
+      } else if (lowerText.includes("scroll to top") || lowerText.includes("home")) {
+        aiText = "Back to the beginning! Zooming to the top.";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // CONVERSATIONAL BRAIN
+      else if (lowerText.includes("who are you") || lowerText.includes("about you")) {
+        aiText = "I'm PJ's digital shadow and your new friend! I'm here to make sure you have the best experience possible. Think of me as the key to this whole digital world.";
+      } else if (lowerText.includes("who is pj") || lowerText.includes("who made you")) {
+        aiText = "Popuri Jayesh made me! He's a creative soul who loves turning code into art. He's also a great guy to work with - very detail-oriented and visionary.";
+      } else if (lowerText.includes("hello") || lowerText.includes("hi") || lowerText.includes("hey")) {
+        aiText = "Hey there! How's your day going? I'm ready for whatever you need. Commands, questions, or just a chat - I'm here!";
+      } else if (lowerText.includes("tech") || lowerText.includes("stack") || lowerText.includes("build")) {
+        aiText = "Everything you see here is built with cutting-edge tech like Next.js 16, Three.js, and Framer Motion. PJ loves using tools that allow for maximum creativity without compromising performance.";
+      } else if (lowerText.includes("joke")) {
+        aiText = "Why did the web developer walk out of the restaurant? Because of the table layout! 😂 Need something more serious?";
+      } else if (lowerText.includes("future") || lowerText.includes("ai")) {
+        aiText = "The future is where creativity meets automation. PJ and I believe in building tools that empower human imagination, not replace it.";
       }
 
       const aiMessage: Message = {
@@ -79,6 +104,14 @@ export default function AIAssistant() {
 
       setMessages((prev) => [...prev, aiMessage]);
       setIsTyping(false);
+      
+      // OPTIONAL: Voice Feedback
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(aiText);
+        utterance.rate = 1.1;
+        utterance.pitch = 1.2;
+        window.speechSynthesis.speak(utterance);
+      }
     }, 1500);
   }, []);
 
