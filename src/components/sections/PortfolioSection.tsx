@@ -1,107 +1,174 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ExternalLink, Play } from "lucide-react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { Play, ArrowRight } from "lucide-react";
+import React, { useRef } from "react";
+
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  link: string;
+}
+
+const ProjectCard = ({ project }: { project: Project }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x);
+  const mouseYSpring = useSpring(y);
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{
+            rotateX,
+            rotateY,
+            transformStyle: "preserve-3d",
+        }}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="project-card relative w-full h-[500px] md:h-[600px] group cursor-pointer"
+    >
+        {/* Glow Shadow */}
+        <div className="absolute inset-4 bg-accent/20 blur-[100px] group-hover:bg-accent/40 transition-colors duration-500 rounded-[40px]" />
+
+        <div 
+            style={{ transform: "translateZ(80px)" }}
+            className="relative h-full w-full bg-[#111] rounded-[40px] border border-white/10 group-hover:border-accent/50 transition-all duration-700 overflow-hidden flex flex-col shadow-2xl"
+        >
+            {/* Video / Preview Container */}
+            <div className="relative w-full h-2/3 overflow-hidden bg-black">
+                {/* Simulated Video Preview using iframe */}
+                <div className="w-full h-full transform transition-transform duration-[10000ms] ease-linear group-hover:scale-125">
+                     <iframe 
+                        src={project.link}
+                        title={project.title}
+                        className="w-[400%] h-[400%] absolute top-0 left-0 origin-top-left scale-[0.25] pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity duration-1000"
+                    />
+                </div>
+                
+                {/* Overlay with Glow */}
+                <div className="absolute inset-0 bg-linear-to-t from-[#111] via-transparent to-transparent opacity-80" />
+                
+                {/* Play Button Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 scale-90 group-hover:scale-100">
+                    <div className="w-20 h-20 rounded-full bg-accent/20 backdrop-blur-xl flex items-center justify-center border border-accent/40 shadow-[0_0_30px_rgba(60,255,122,0.3)]">
+                        <Play className="text-accent fill-accent w-8 h-8 ml-1" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-10 flex flex-col flex-grow justify-between relative bg-linear-to-b from-transparent to-[#0a0a0a]">
+                <div style={{ transform: "translateZ(30px)" }}>
+                    <h3 className="text-3xl font-bold font-poppins text-white mb-4 group-hover:text-accent transition-colors duration-300">
+                        {project.title}
+                    </h3>
+                    <p className="text-white/60 font-inter text-lg leading-relaxed max-w-sm">
+                        {project.description}
+                    </p>
+                </div>
+
+                <div className="flex justify-between items-end" style={{ transform: "translateZ(50px)" }}>
+                    <a 
+                        href={project.link} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="flex items-center gap-3 text-white font-bold text-lg hover:text-accent transition-colors group/link"
+                    >
+                        Visit Website
+                        <ArrowRight className="w-6 h-6 transform -rotate-45 group-hover/link:rotate-0 transition-transform" />
+                    </a>
+                    
+                    <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white/40 font-mono text-sm group-hover:border-accent group-hover:text-accent transition-all">
+                        {project.id}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </motion.div>
+  );
+};
 
 export default function PortfolioSection() {
   const projects = [
     {
+      id: "01",
       title: "Green Cafe Website",
       description: "A visually stunning aesthetic cafe website built with modern UI principles.",
       link: "https://pukodi123-cyber.github.io/green-",
-      color: "from-emerald-500 to-green-900",
     },
     {
+      id: "02",
       title: "Green Caffeine Cafe",
       description: "Premium animated coffee shop experience with 3D interactions.",
       link: "https://green-caffeine-cafe.vercel.app",
-      color: "from-[#3cff7a] to-emerald-800",
     },
   ];
 
   return (
-    <section id="portfolio" className="relative w-full py-32 bg-[#0a0a0a]">
+    <section id="portfolio" className="relative w-full py-40 bg-[#050505] overflow-hidden">
+      {/* Background Cinematic Blobs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-secondary/5 blur-[150px] rounded-full translate-y-1/2 -translate-x-1/2" />
+
       <div className="container mx-auto px-6 relative z-10">
-        <motion.div
-           initial={{ opacity: 0, scale: 0.9 }}
-           whileInView={{ opacity: 1, scale: 1 }}
-           viewport={{ once: true }}
-           transition={{ duration: 0.5 }}
-           className="text-center mb-20"
-        >
-          <h2 className="text-4xl md:text-5xl font-poppins font-bold text-white mb-4">
-            Featured Work
-          </h2>
-          <div className="w-24 h-1 bg-[#3c8cff] mx-auto rounded-full" />
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-          {projects.map((project, idx) => (
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-24 gap-8">
             <motion.div
-              key={idx}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-100px" }}
-              whileHover={{ 
-                scale: 1.02,
-                rotateY: 2,
-                rotateX: -2,
-                z: 50
-              }}
-              transition={{
-                scale: { type: "spring", stiffness: 300, damping: 20 },
-                rotateY: { type: "spring", stiffness: 300, damping: 20 },
-                rotateX: { type: "spring", stiffness: 300, damping: 20 },
-                duration: 0.5
-              }}
-              className="project-card group perspective-1000 relative"
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
             >
-              <div className="glass rounded-[32px] overflow-hidden border border-white/10 group-hover:border-accent/60 transition-all duration-500 hover:shadow-[0_0_80px_rgba(60,255,122,0.2)] flex flex-col h-full bg-[#0f0f0f]">
-                {/* Project live Video / iframe Preview */}
-                <div className="relative w-full h-[250px] md:h-[300px] overflow-hidden bg-[#111]">
-                  <div className="absolute inset-0 w-full h-[300%] group-hover:-translate-y-2/3 transition-transform duration-[8000ms] ease-linear">
-                    <iframe 
-                       src={project.link}
-                       title={project.title}
-                       className="absolute inset-0 w-[400%] h-full origin-top-left scale-[0.25] pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                    />
-                  </div>
-                  
-                  {/* Decorative "Video" Play overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm bg-black/40">
-                     <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md border border-white/30">
-                        <Play className="text-white w-6 h-6 ml-1" />
-                     </div>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-8 flex flex-col flex-grow relative">
-                  <div className="absolute top-0 right-8 transform -translate-y-1/2 w-12 h-12 bg-[#0f0f0f] border border-white/10 rounded-full flex items-center justify-center group-hover:bg-[#3cff7a] transition-colors duration-300">
-                    <ExternalLink className="w-5 h-5 text-white group-hover:text-black transition-colors" />
-                  </div>
-                  
-                  <h3 className="text-2xl font-bold font-poppins text-white mb-3 group-hover:text-[#3cff7a] transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-gray-400 font-inter text-sm mb-8 flex-grow">
-                    {project.description}
-                  </p>
-                  
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-white font-medium hover:text-[#3cff7a] transition-colors w-fit group/btn"
-                  >
-                    Visit Website
-                    <motion.div
-                      className="w-8 h-px bg-[#3cff7a] group-hover/btn:w-16 transition-all duration-300"
-                    />
-                  </a>
-                </div>
-              </div>
+                <h2 className="text-glow text-accent uppercase font-bold tracking-[0.3em] mb-4 text-sm">
+                    Selected Work
+                </h2>
+                <h3 className="text-5xl md:text-7xl font-poppins font-black text-white leading-[1.1]">
+                    Interactive <br /><span className="text-white/40 italic">Experiences</span>
+                </h3>
             </motion.div>
+            
+            <motion.p 
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="text-white/50 max-w-md text-lg font-inter"
+            >
+                Each project is a unique blend of creativity and engineering, focused on making a lasting impact.
+            </motion.p>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-12 gap-y-24">
+          {projects.map((project) => (
+            <ProjectCard key={project.id} project={project} />
           ))}
         </div>
       </div>

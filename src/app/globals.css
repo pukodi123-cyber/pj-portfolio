@@ -1,66 +1,105 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-primary: #0f0f0f;
+  --color-primary: #050505;
   --color-accent: #3cff7a;
   --color-secondary: #3c8cff;
   --font-inter: var(--font-inter);
   --font-poppins: var(--font-poppins);
-  --font-playfair: var(--font-playfair);
 }
 
 :root {
-  --background: #0f0f0f;
+  --background: #050505;
   --foreground: #ffffff;
+  --accent-glow: rgba(60, 255, 122, 0.4);
 }
 
-body {
+* {
+  box-sizing: border-box;
+}
+
+html, body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), sans-serif;
   overflow-x: hidden;
+  cursor: none; /* Required for custom cursor */
 }
 
-/* Base Headings */
+/* Custom Cursor fallback for mobile */
+@media (max-width: 768px) {
+  html, body {
+    cursor: auto;
+  }
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-poppins), sans-serif;
 }
 
-/* Glassmorphism utility */
+/* Cinematic Effects */
+.text-glow {
+  text-shadow: 0 0 15px var(--accent-glow);
+}
+
 .glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Soft shadows */
 .soft-shadow {
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
 }
 
-/* Glowing border hover */
 .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(60, 255, 122, 0.3);
+  box-shadow: 0 0 30px var(--accent-glow);
   border-color: #3cff7a;
 }
 
-/* Neumorphic text */
-.text-glow {
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+/* Perspective Utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.perspective-1200 {
+  perspective: 1200px;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f0f0f;
+  background: #050505;
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
+  background: #1a1a1a;
+  border-radius: 10px;
+  transition: background 0.3s;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #3cff7a;
+}
+
+/* Selection */
+::selection {
+  background: #3cff7a;
+  color: #000;
+}
+
+/* Sections Story-driven Scroll */
+section {
+  position: relative;
+  width: 100%;
+}
+
+/* GSAP / Motion Helpers */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.hero-gradient {
+  background: radial-gradient(circle at center, rgba(60, 255, 122, 0.1) 0%, transparent 70%);
 }

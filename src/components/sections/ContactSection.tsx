@@ -3,12 +3,14 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import confetti from "canvas-confetti";
+import Image from "next/image";
+import { Send, CheckCircle } from "lucide-react";
 
 export default function ContactSection() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    mobile: "",
     details: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,42 +20,37 @@ export default function ContactSection() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const waText = `*New Website Inquiry*%0A%0A*Name:* ${formData.name}%0A*Email:* ${formData.email}%0A*Phone:* ${formData.phone}%0A*Details:* ${formData.details}`;
+    const waText = `*New Website Inquiry*%0A%0A*Name:* ${formData.name}%0A*Email:* ${formData.email}%0A*Mobile:* ${formData.mobile}%0A*Project Details:* ${formData.details}`;
     const waUrl = `https://wa.me/919381722155?text=${waText}`;
 
+    // Send email via FormSubmit (silent, behind scenes)
     try {
-      // 1. Send Background Email via FormSubmit
-      await fetch("https://formsubmit.co/ajax/popurijayesh0@gmail.com", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ ...formData, _subject: `Website Inquiry: ${formData.name}` }),
-      });
-
-      // 2. SEND AUTOMATED BACKGROUND MESSAGE VIA WEBHOOK (Make.com)
-      await fetch("https://hook.eu1.make.com/iyquotmlzwmtynzmlv3psagd51j47uqy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-    } catch (e) {
-      console.error("Background notification failed", e);
+        await fetch("https://formsubmit.co/ajax/popurijayesh0@gmail.com", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify({ ...formData, _subject: `PJ Portfolio Inquiry: ${formData.name}` }),
+        });
+    } catch (err) {
+        console.error("Email send failed", err);
     }
 
-    // Success transition
+    // Success animation flow
     setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ["#3cff7a", "#3c8cff", "#ffffff"],
-      });
+        setIsSubmitting(false);
+        setIsSuccess(true);
+        
+        confetti({
+            particleCount: 150,
+            spread: 90,
+            origin: { y: 0.6 },
+            colors: ["#3cff7a", "#3c8cff", "#ffffff"],
+        });
 
-      // Force open WhatsApp immediately
-      window.open(waUrl, "_blank");
-    }, 1000);
+        // Open WhatsApp after a short delay
+        setTimeout(() => {
+           window.open(waUrl, "_blank");
+        }, 1500);
+    }, 2000);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -61,160 +58,166 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="relative w-full py-32 bg-[#0f0f0f] overflow-hidden">
-      <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-accent/10 rounded-full blur-[150px] pointer-events-none" />
+    <section id="contact" className="relative w-full py-40 bg-[#060606] overflow-hidden">
+      {/* Background Cinematic Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/5 blur-[180px] rounded-full pointer-events-none" />
 
-      <div className="container mx-auto px-6 relative z-10 max-w-4xl">
-        <motion.div
-           initial={{ opacity: 0, y: 50 }}
-           whileInView={{ opacity: 1, y: 0 }}
-           viewport={{ once: true }}
-           transition={{ duration: 0.6 }}
-           className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-poppins font-bold text-white mb-4">
-            Let&apos;s Build Together
-          </h2>
-          <div className="w-24 h-1 bg-[#3cff7a] mx-auto rounded-full" />
-        </motion.div>
-
-        <motion.div
-           initial={{ opacity: 0, y: 50 }}
-           whileInView={{ opacity: 1, y: 0 }}
-           viewport={{ once: true }}
-           transition={{ duration: 0.8 }}
-           className="glass p-8 md:p-12 rounded-[40px] border border-white/10 soft-shadow"
-        >
-          <AnimatePresence mode="wait">
-            {!isSuccess ? (
-              <motion.form
-                key="form"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="flex flex-col gap-6"
-                onSubmit={handleSubmit}
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-gray-300 font-medium">Name</label>
-                    <input
-                      required
-                      type="text"
-                      name="name"
-                      onChange={handleChange}
-                      className="bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#3cff7a] transition-colors"
-                      placeholder="John Doe"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-gray-300 font-medium">Email</label>
-                    <input
-                      required
-                      type="email"
-                      name="email"
-                      onChange={handleChange}
-                      className="bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#3cff7a] transition-colors"
-                      placeholder="john@example.com"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-gray-300 font-medium">Mobile Number</label>
-                  <input
-                    required
-                    type="tel"
-                    name="phone"
-                    onChange={handleChange}
-                    className="bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#3cff7a] transition-colors"
-                    placeholder="+91 98765 43210"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-gray-300 font-medium">Project Details</label>
-                  <textarea
-                    required
-                    name="details"
-                    rows={4}
-                    onChange={handleChange}
-                    className="bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#3cff7a] transition-colors resize-none"
-                    placeholder="Tell me about your business and what kind of website you need..."
-                  />
-                </div>
-
-                <div className="mt-4 relative flex justify-center">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`nav-button relative w-full md:w-auto px-12 py-4 bg-[#3cff7a] text-black font-bold rounded-full transition-all hover-glow overflow-hidden ${
-                      isSubmitting ? "opacity-90 cursor-not-allowed scale-95" : "hover:scale-105"
-                    }`}
-                  >
-                    {isSubmitting ? "Sending..." : "Start My Website"}
-                  </button>
-
-                  {/* Character pop up animation */}
-                  <AnimatePresence>
-                    {isSubmitting && (
-                      <motion.div
-                        className="absolute bottom-16 w-16 h-16 pointer-events-none z-50 rounded-full border border-[#3cff7a] bg-[#1a1a1a] flex items-center justify-center p-1"
-                        initial={{ opacity: 0, y: 0, scale: 0.5 }}
-                        animate={{ opacity: [0, 1, 1, 0], y: -200, x: [0, -20, 20, 0], scale: 1 }}
-                        transition={{ duration: 2, ease: "easeOut" }}
-                      >
-                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                         <div className="w-full h-full rounded-full bg-linear-to-tr from-accent to-secondary flex items-center justify-center p-[2px] shadow-[0_0_30px_rgba(60,255,122,0.3)]">
-                            <div className="w-full h-full rounded-full bg-black flex items-center justify-center">
-                               <div className="w-6 h-6 bg-accent rounded-full animate-pulse blur-[2px]" />
-                            </div>
-                         </div>
-                         
-                         {/* Sparkles */}
-                         <motion.div 
-                           className="absolute -right-4 -top-4 w-4 h-4 rounded-full bg-white blur-[2px]"
-                           animate={{ scale: [1, 2, 1], opacity: [0.5, 1, 0.5] }}
-                           transition={{ repeat: Infinity, duration: 0.3 }}
-                         />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.form>
-            ) : (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-16 flex flex-col items-center gap-4"
-              >
-                <div className="w-20 h-20 bg-[#3cff7a]/20 rounded-full flex items-center justify-center border border-[#3cff7a] animate-pulse">
-                  <svg className="w-10 h-10 text-[#3cff7a]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                </div>
-                <h3 className="text-3xl font-bold font-poppins text-white mt-4 text-glow">
-                  Thank You!
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="max-w-4xl mx-auto">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="text-center mb-20"
+            >
+                <h2 className="text-glow text-accent uppercase font-bold tracking-[0.3em] mb-4 text-sm">
+                    Contact
+                </h2>
+                <h3 className="text-5xl md:text-7xl font-poppins font-black text-white mb-6 tracking-tighter">
+                    Start Your <span className="text-white/40 italic">Project</span>
                 </h3>
-                <p className="text-xl text-gray-300 max-w-md">
-                   Project received. I will reach out shortly.
+                <p className="text-white/50 text-xl font-inter max-w-xl mx-auto">
+                    Let&apos;s turn your vision into a stunning digital reality.
                 </p>
-                <div className="mt-8 flex flex-col items-center gap-4">
-                  <a 
-                    href={`https://wa.me/919381722155?text=${encodeURIComponent(`*New Website Inquiry*%0A%0A*Name:* ${formData.name}%0A*Phone:* ${formData.phone}`)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-10 py-4 bg-accent text-black font-bold rounded-full hover-glow transition-all hover:scale-105"
-                  >
-                    Open WhatsApp to Complete
-                  </a>
-                  <p className="text-sm text-gray-500">
-                    If WhatsApp didn&apos;t open automatically, click the button above.
-                  </p>
+            </motion.div>
+
+            <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1 }}
+                className="relative"
+            >
+                {/* GLASSMORPHISM FORM */}
+                <div className="glass p-8 md:p-16 rounded-[48px] border border-white/10 soft-shadow group hover:border-accent/30 transition-all duration-700 bg-black/40 backdrop-blur-3xl min-h-[500px] flex items-center justify-center">
+                    <AnimatePresence mode="wait">
+                        {!isSuccess ? (
+                            <motion.form 
+                                key="contact-form"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.5 }}
+                                className="w-full space-y-8"
+                                onSubmit={handleSubmit}
+                            >
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-3">
+                                        <label className="text-white/60 font-bold ml-4 text-sm tracking-widest uppercase">Name</label>
+                                        <input 
+                                            required
+                                            type="text" 
+                                            name="name" 
+                                            placeholder="Your Name"
+                                            onChange={handleChange}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-transparent transition-all placeholder:text-white/20 text-lg"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-white/60 font-bold ml-4 text-sm tracking-widest uppercase">Email</label>
+                                        <input 
+                                            required
+                                            type="email" 
+                                            name="email" 
+                                            placeholder="Your Email"
+                                            onChange={handleChange}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-transparent transition-all placeholder:text-white/20 text-lg"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-3">
+                                    <label className="text-white/60 font-bold ml-4 text-sm tracking-widest uppercase">Mobile Number</label>
+                                    <input 
+                                        required
+                                        type="tel" 
+                                        name="mobile" 
+                                        placeholder="+91 00000 00000"
+                                        onChange={handleChange}
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-transparent transition-all placeholder:text-white/20 text-lg"
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="text-white/60 font-bold ml-4 text-sm tracking-widest uppercase">Project Details</label>
+                                    <textarea 
+                                        required
+                                        name="details" 
+                                        rows={4}
+                                        placeholder="Tell me about your business..."
+                                        onChange={handleChange}
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-transparent transition-all placeholder:text-white/20 text-lg resize-none"
+                                    />
+                                </div>
+
+                                <div className="flex justify-center pt-6">
+                                    <button 
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="group/btn relative overflow-hidden bg-accent px-12 py-5 rounded-2xl font-black text-black text-xl flex items-center gap-3 transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-[0_0_40px_rgba(60,255,122,0.3)]"
+                                    >
+                                        <span className="relative z-10">{isSubmitting ? "Sourcing Particles..." : "Start My Website"}</span>
+                                        <Send className="w-6 h-6 transform group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
+                                        
+                                        {/* Hover Effect */}
+                                        <motion.div 
+                                            className="absolute inset-0 bg-white"
+                                            initial={{ x: "-100%" }}
+                                            whileHover={{ x: "0%" }}
+                                            transition={{ duration: 0.3 }}
+                                            style={{ mixBlendMode: 'overlay' }}
+                                        />
+                                    </button>
+                                </div>
+                            </motion.form>
+                        ) : (
+                            <motion.div 
+                                key="success-screen"
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-center flex flex-col items-center"
+                            >
+                                <div className="w-24 h-24 rounded-full bg-accent/20 flex items-center justify-center mb-8 border border-accent/40 animate-bounce">
+                                    <CheckCircle className="text-accent w-12 h-12" />
+                                </div>
+                                <h4 className="text-5xl font-black text-white mb-6 text-glow">
+                                    Success!
+                                </h4>
+                                <p className="text-2xl text-white/70 max-w-md font-inter leading-relaxed">
+                                    Your request has been sent! <br /> I&apos;ll contact you soon.
+                                </p>
+                                <p className="text-white/40 mt-10 text-lg">
+                                    WhatsApp is opening automatically...
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+
+                {/* ANIMATED CARTOON CHARACTER ON SUBMIT */}
+                <AnimatePresence>
+                    {isSubmitting && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 100, scale: 0.5 }}
+                            animate={{ opacity: 1, y: -400, scale: 1 }}
+                            exit={{ opacity: 0, scale: 1.5 }}
+                            transition={{ duration: 2, ease: "easeOut" }}
+                            className="absolute bottom-0 left-1/2 -translate-x-1/2 z-[100] w-64 h-64 pointer-events-none"
+                        >
+                            <div className="relative w-full h-full drop-shadow-[0_0_30px_rgba(60,255,122,0.5)]">
+                                <Image 
+                                    src="/cartoon-pj.png" 
+                                    alt="PJ Cartoon" 
+                                    fill
+                                    className="object-contain"
+                                />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </motion.div>
+        </div>
       </div>
     </section>
   );
