@@ -117,22 +117,27 @@ export default function AIAssistant() {
         } else {
           try {
             const systemPrompt = "You are PJ's (Popuri Jayesh) authorized digital assistant and best friend. PJ is a Creative Web Developer based in India. Your tone is warm, extremely friendly, and professional. Be concise but helpful.";
-            // Using qwen-72b as it is more stable and less likely to show deprecation notices on Pollinations
-            const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?system=${encodeURIComponent(systemPrompt)}&private=true&model=qwen`);
+            
+            // SECURITY: Call our local API route instead of external URL
+            const response = await fetch("/api/chat", {
+               method: "POST",
+               headers: { "Content-Type": "application/json" },
+               body: JSON.stringify({
+                 messages: [
+                   { role: "system", content: systemPrompt },
+                   { role: "user", content: text }
+                 ]
+               })
+            });
             
             if (response.ok) {
-              aiText = await response.text();
+              const data = await response.json();
+              aiText = data.text;
             } else {
-              // Try without system prompt if it fails
-              const backupResponse = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?private=true&model=qwen`);
-              if (backupResponse.ok) {
-                aiText = await backupResponse.text();
-              } else {
-                throw new Error("API Down");
-              }
+              throw new Error("Chat API Failed");
             }
           } catch (error) {
-            console.error("AI Error:", error);
+            console.error("AI Assistant Error:", error);
             aiText = "I'm having a little trouble connecting to my central memory right now, but I'm still here! Feel free to ask about PJ's projects or skills, or reach out to him via the contact form!";
           }
         }
