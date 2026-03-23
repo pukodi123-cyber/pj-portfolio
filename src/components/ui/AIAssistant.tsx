@@ -56,7 +56,13 @@ export default function AIAssistant() {
 
     // Local knowledge fallback for stability
     const getLocalResponse = (query: string) => {
-      const q = query.toLowerCase();
+      const q = query.toLowerCase().trim();
+      
+      // Greetings
+      if (["hi", "hello", "hey", "hola", "hi there", "hello there"].includes(q)) {
+        return "Hey there! I'm PJ's digital assistant. How's your day going? What can I help you discover about PJ today?";
+      }
+
       if (q.includes("who is pj") || q.includes("who are you") || q.includes("about pj")) {
         return "Popuri Jayesh (PJ) is a Creative Web Developer based in India. He specializes in high-end, animated portfolios using Next.js, Three.js, and Framer Motion. He's passionate about building cinematic digital experiences!";
       }
@@ -111,13 +117,14 @@ export default function AIAssistant() {
         } else {
           try {
             const systemPrompt = "You are PJ's (Popuri Jayesh) authorized digital assistant and best friend. PJ is a Creative Web Developer based in India. Your tone is warm, extremely friendly, and professional. Be concise but helpful.";
-            const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?system=${encodeURIComponent(systemPrompt)}&private=true&model=openai`);
+            // Using qwen-72b as it is more stable and less likely to show deprecation notices on Pollinations
+            const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?system=${encodeURIComponent(systemPrompt)}&private=true&model=qwen`);
             
             if (response.ok) {
               aiText = await response.text();
             } else {
-              // Try without system prompt if it fails (as seen in debugging)
-              const backupResponse = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?private=true&model=openai`);
+              // Try without system prompt if it fails
+              const backupResponse = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?private=true&model=qwen`);
               if (backupResponse.ok) {
                 aiText = await backupResponse.text();
               } else {
