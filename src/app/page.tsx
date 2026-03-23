@@ -12,6 +12,7 @@ import ServicesSection from "@/components/sections/ServicesSection";
 import QuotesSection from "@/components/sections/QuotesSection";
 import PortfolioSection from "@/components/sections/PortfolioSection";
 import ContactSection from "@/components/sections/ContactSection";
+import AIAssistant from "@/components/ui/AIAssistant";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
@@ -49,6 +50,7 @@ export default function Home() {
       >
         <Navbar />
         <WhatsAppButton />
+        <AIAssistant />
         <CustomCursor />
         <main className="flex-grow">
           <HeroSection />
