@@ -1,0 +1,21 @@
+﻿
+> pj-portfolio@0.1.0 lint
+> eslint
+
+
+C:\Users\popuri jayesh\.gemini\antigravity\scratch\pj-portfolio\src\components\ui\AIAssistant.tsx
+  46:11  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\popuri jayesh\.gemini\antigravity\scratch\pj-portfolio\src\components\ui\AIAssistant.tsx:46:11
+  44 |
+  45 |     const userMessage: Message = {
+> 46 |       id: Date.now().toString(),
+     |           ^^^^^^^^^^ Cannot call impure function
+  47 |       role: "user",
+  48 |       text,
+  49 |       timestamp: new Date(),  react-hooks/purity
+
+Γ£û 1 problem (1 error, 0 warnings)
+

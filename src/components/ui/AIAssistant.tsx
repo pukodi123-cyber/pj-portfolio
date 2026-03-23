@@ -3,13 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Bot, Sparkles } from "lucide-react";
+import { useCallback } from "react";
 import Image from "next/image";
 
 interface Message {
   id: string;
   role: "ai" | "user";
   text: string;
-  timestamp: Date;
+  timestamp: number;
 }
 
 export default function AIAssistant() {
@@ -19,7 +20,7 @@ export default function AIAssistant() {
       id: "1",
       role: "ai",
       text: "Hi! I'm PJ's Digital Assistant. How can I help you navigate his creative world today?",
-      timestamp: new Date(),
+      timestamp: 1711152000000, // Static timestamp for March 23, 2026
     },
   ]);
   const [inputValue, setInputValue] = useState("");
@@ -39,14 +40,15 @@ export default function AIAssistant() {
     "Tech Stack"
   ];
 
-  const handleSend = (text: string) => {
+  const handleSend = useCallback((text: string) => {
     if (!text.trim()) return;
 
+    const msgTimestamp = Date.now();
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: msgTimestamp.toString(),
       role: "user",
       text,
-      timestamp: new Date(),
+      timestamp: msgTimestamp,
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -72,13 +74,13 @@ export default function AIAssistant() {
         id: (Date.now() + 1).toString(),
         role: "ai",
         text: aiText,
-        timestamp: new Date(),
+        timestamp: Date.now(),
       };
 
       setMessages((prev) => [...prev, aiMessage]);
       setIsTyping(false);
     }, 1500);
-  };
+  }, []);
 
   return (
     <div className="fixed bottom-32 right-6 z-100 md:right-10 pointer-events-auto">
@@ -136,7 +138,7 @@ export default function AIAssistant() {
                   }`}>
                     <p className="text-sm leading-relaxed">{m.text}</p>
                     <span className="text-[9px] opacity-40 mt-1 block">
-                      {m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                 </motion.div>
