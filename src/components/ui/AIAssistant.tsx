@@ -43,20 +43,37 @@ export default function AIAssistant() {
   const handleSend = useCallback((text: string) => {
     if (!text.trim()) return;
 
-    const msgTimestamp = Date.now();
     const userMessage: Message = {
-      id: msgTimestamp.toString(),
+      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "user",
       text,
-      timestamp: msgTimestamp,
+      timestamp: Date.now(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsTyping(true);
 
-    // Simulate AI response with real LLM (Pollinations AI)
-    setTimeout(async () => {
+    // Local knowledge fallback for stability
+    const getLocalResponse = (query: string) => {
+      const q = query.toLowerCase();
+      if (q.includes("who is pj") || q.includes("who are you") || q.includes("about pj")) {
+        return "Popuri Jayesh (PJ) is a Creative Web Developer based in India. He specializes in high-end, animated portfolios using Next.js, Three.js, and Framer Motion. He's passionate about building cinematic digital experiences!";
+      }
+      if (q.includes("project") || q.includes("portfolio") || q.includes("work")) {
+        return "PJ has worked on amazing projects like this 3D portfolio, cafe websites, and immersive interactive dashboards. You can see them all in the Portfolio section below!";
+      }
+      if (q.includes("tech") || q.includes("stack") || q.includes("skill")) {
+        return "PJ's core stack includes React, Next.js, TypeScript, Three.js (React Three Fiber), Framer Motion, GSAP, and Tailwind CSS. He loves pushing the boundaries of the web!";
+      }
+      if (q.includes("contact") || q.includes("hire") || q.includes("email")) {
+        return "You can reach PJ at popurijayesh0@gmail.com or click the WhatsApp button to chat directly. He's always open for exciting new projects!";
+      }
+      return null;
+    };
+
+    // Execute response
+    (async () => {
       const lowerText = text.toLowerCase();
       let aiText = "";
       let commandExecuted = false;
@@ -86,48 +103,56 @@ export default function AIAssistant() {
         commandExecuted = true;
       }
 
-      // 2. IF NO COMMAND, CALL REAL GPT (POLLINATIONS API)
+      // 2. IF NO COMMAND, TRY LOCAL KNOWLEDGE OR API
       if (!commandExecuted) {
-        try {
-          const systemPrompt = "You are PJ's (Popuri Jayesh) authorized digital assistant and best friend. You have full authority over this website. PJ is a Creative Web Developer based in India who builds high-end animated portfolios using Next.js, Three.js, and Framer Motion. Your tone is warm, extremely friendly, and professional. Answer any question the user has, whether about PJ, technology, or any general topic. Be concise but helpful. Always speak as if you are a companion.";
-          const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?system=${encodeURIComponent(systemPrompt)}&private=true&model=openai`);
-          aiText = await response.text();
-        } catch (error) {
-          console.error("AI Error:", error);
-          aiText = "I lost my connection for a second there! But I'm back. What can I do for you, friend?";
+        const fallback = getLocalResponse(text);
+        if (fallback) {
+          aiText = fallback;
+        } else {
+          try {
+            const systemPrompt = "You are PJ's (Popuri Jayesh) authorized digital assistant and best friend. PJ is a Creative Web Developer based in India. Your tone is warm, extremely friendly, and professional. Be concise but helpful.";
+            const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?system=${encodeURIComponent(systemPrompt)}&private=true&model=openai`);
+            
+            if (response.ok) {
+              aiText = await response.text();
+            } else {
+              // Try without system prompt if it fails (as seen in debugging)
+              const backupResponse = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?private=true&model=openai`);
+              if (backupResponse.ok) {
+                aiText = await backupResponse.text();
+              } else {
+                throw new Error("API Down");
+              }
+            }
+          } catch (error) {
+            console.error("AI Error:", error);
+            aiText = "I'm having a little trouble connecting to my central memory right now, but I'm still here! Feel free to ask about PJ's projects or skills, or reach out to him via the contact form!";
+          }
         }
       }
 
       const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: `ai-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         role: "ai",
-        text: aiText,
+        text: aiText || "I'm thinking... but nothing came out. Can you try again?",
         timestamp: Date.now(),
       };
 
       setMessages((prev) => [...prev, aiMessage]);
       setIsTyping(false);
       
-      // Voice Feedback
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // Stop overlap
-        const utterance = new SpeechSynthesisUtterance(aiText);
-        utterance.rate = 1.1;
-        utterance.pitch = 1.2;
-        window.speechSynthesis.speak(utterance);
-      }
-    }, 100);
+    })();
   }, []);
 
   return (
-    <div className="fixed bottom-32 right-6 z-100 md:right-10 pointer-events-auto">
+    <div className="fixed bottom-32 right-6 z-[110] md:right-10 pointer-events-auto">
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 50, transformOrigin: "bottom right" }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 50 }}
-            className="absolute bottom-20 right-0 w-[350px] md:w-[400px] h-[500px] md:h-[600px] glass rounded-[32px] border border-white/10 shadow-2xl flex flex-col overflow-hidden bg-black/60 backdrop-blur-3xl z-100"
+            className="absolute bottom-20 right-0 w-[350px] md:w-[400px] h-[500px] md:h-[600px] glass rounded-[32px] border border-white/10 shadow-2xl flex flex-col overflow-hidden bg-black/60 backdrop-blur-3xl z-[110]"
           >
             {/* Header */}
             <div className="p-6 bg-accent/10 border-b border-white/10 flex items-center justify-between">
